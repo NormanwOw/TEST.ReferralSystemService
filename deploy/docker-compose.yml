@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    user: "70:70"
+    volumes:
+      - referral_system_service_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - "5431:5432"
+    networks:
+      - postgres_network
+    container_name: referral_system_service_postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 60s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.0.10-alpine
+    restart: always
+    networks:
+      - redis_network
+    container_name: referral_system_service_redis
+
+  app:
+    build:
+      context: ./../
+    image: referral_system_service:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    networks:
+      - postgres_network
+      - redis_network
+    depends_on:
+      - postgres
+      - redis
+    container_name: referral_system_service
+    command: bash -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"
+
+volumes:
+  referral_system_service_data: {}
+
+networks:
+  redis_network: {}
+  postgres_network: {}
