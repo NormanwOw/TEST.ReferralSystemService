@@ -12,12 +12,6 @@
 
 Swagger будет доступен по адресу: `127.0.0.1:8000/api/v1/docs`
 
-## Tests
-
-Актуальная версия запущена здесь - http://46.146.233.197:8000/api/v1/docs  
-- Test login: **test@gmail.com**  
-- Test password: **123**  
-
 `user_id` для эндпоинта `GET /api/v1/users/{user_id}/referrals` можно получить в `GET /api/v1/auth/me`
 после прохождения авторизации
 
