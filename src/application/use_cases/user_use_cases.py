@@ -1,10 +1,11 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import HTTPException
-
 from src.application.use_cases.base import UseCase
 from src.domain.entities import User, Code
+from src.domain.exceptions import AppException, AlreadyExistUserException, UserNotFoundException, \
+    CodeNotFoundException, CodeExpiredException
+from src.domain.interfaces import IPasswordHasher
 from src.domain.services.auth_service import AuthService
 from src.infrastructure.logger.interfaces import ILogger
 from src.infrastructure.models import UserModel, CodeModel
@@ -24,7 +25,7 @@ class GetUserByEmail(UseCase[str, User]):
             async with self.uow:
                 user = await self.uow.users.find_by_email(email)
                 if not user:
-                    raise HTTPException(status_code=404, detail='User does not exist')
+                    raise UserNotFoundException()
 
                 return User(
                     id=user.id,
@@ -33,11 +34,11 @@ class GetUserByEmail(UseCase[str, User]):
                     code=user.code.value if user.code else None,
                     hashed_password=user.password
                 )
-        except HTTPException as ex:
+        except AppException as ex:
             raise ex
-        except Exception:
+        except Exception as ex:
             self.logger.error(f'Ошибка при получении пользователя по Email: {email}')
-        raise HTTPException(status_code=500)
+            raise ex
 
 
 class GetReferralsByUserID(UseCase[UUID, List[UserResponse]]):
@@ -51,47 +52,49 @@ class GetReferralsByUserID(UseCase[UUID, List[UserResponse]]):
             async with self.uow:
                 user = await self.uow.users.find_one(UserModel.id, user_id)
                 if not user:
-                    raise HTTPException(status_code=404, detail='User does not exist')
+                    raise UserNotFoundException()
 
                 return [
                     UserResponse(email=referral.email) for referral in user.referrals
                 ]
-        except HTTPException as ex:
+        except AppException as ex:
             raise ex
         except Exception:
             self.logger.error(f'Ошибка при получении рефералов по ID пользователя: {user_id}')
-        raise HTTPException(status_code=500)
 
 
 class RegisterUser(UseCase[Code, None]):
 
-    def __init__(self, uow: IUnitOfWork, auth_service: AuthService, logger: ILogger):
+    def __init__(
+        self,
+        uow: IUnitOfWork,
+        auth_service: AuthService,
+        hasher: IPasswordHasher,
+        logger: ILogger
+    ):
         self.uow = uow
         self.auth_service = auth_service
+        self.hasher = hasher
         self.logger = logger
 
     async def __call__(self, form_data: RegistrationForm):
         try:
             async with self.uow:
                 user = await self.uow.users.find_by_email(form_data.email)
-                if user:
-                    raise HTTPException(
-                        status_code=400,
-                        detail='User with this email already exists'
-                    )
-                user = await self.uow.users.find_by_code(Code(value=form_data.code))
 
+                if user:
+                    raise AlreadyExistUserException()
+
+                user = await self.uow.users.find_by_code(Code(value=form_data.code))
                 if not user:
-                    raise HTTPException(
-                        status_code=404,
-                        detail='User with this referral code does not exist'
-                    )
+                    raise CodeNotFoundException()
+
                 if user.code.is_code_expired():
                     await self.uow.codes.delete_one(CodeModel.id, user.code.id)
                     await self.uow.commit()
-                    raise HTTPException(status_code=404, detail='Code not found')
+                    raise CodeExpiredException()
 
-                hashed_password = self.auth_service.get_password_hash(form_data.password)
+                hashed_password = self.hasher.hash(form_data.password)
                 new_user = UserModel(
                     email=form_data.email,
                     password=hashed_password,
@@ -101,11 +104,11 @@ class RegisterUser(UseCase[Code, None]):
                 await self.uow.users.add(new_user)
                 await self.uow.commit()
                 self.logger.info(f'Зарегистрирован пользователь {new_user.email}')
-        except HTTPException as ex:
+        except AppException as ex:
             raise ex
-        except Exception:
+        except Exception as ex:
             self.logger.error(f'Ошибка при регистрации пользователя:\n'
                               f'Email: {form_data.email}\n'
                               f'Password: {form_data.password}\n'
                               f'Code: {form_data.code}\n')
-            raise HTTPException(status_code=500)
+            raise ex
