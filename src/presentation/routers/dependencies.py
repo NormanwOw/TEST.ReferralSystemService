@@ -9,6 +9,8 @@ from src.application.use_cases.code_use_cases import CreateCode, DeleteCode, Get
 from src.application.use_cases.user_use_cases import GetUserByEmail, RegisterUser, GetReferralsByUserID
 from src.domain.services.auth_service import AuthService
 from src.infrastructure.logger.logger import Logger
+from src.infrastructure.password_hasher import BcryptHasher
+from src.infrastructure.services.jwt_token_service import JWTTokenService
 from src.infrastructure.session import async_session
 from src.infrastructure.uow.impl import UnitOfWork
 from src.presentation.routers.schemas import MeSchema
@@ -22,7 +24,9 @@ class AuthDependencies:
     uow = UnitOfWork(async_session)
     logger = Logger()
     get_user = GetUserByEmail(uow, logger)
-    auth_service = AuthService(settings, get_user, logger)
+    token_service = JWTTokenService(settings.SECRET_KEY, settings.ALGORITHM)
+    hasher = BcryptHasher()
+    auth_service = AuthService(token_service, hasher, settings, get_user, logger)
 
     @classmethod
     async def get_active_user(cls, token: Annotated[str, Depends(oauth2_scheme)]) -> MeSchema:
@@ -30,11 +34,11 @@ class AuthDependencies:
 
     @classmethod
     async def auth_user(cls) -> AuthUser:
-        return AuthUser(cls.get_user, cls.auth_service, cls.logger)
+        return AuthUser(cls.get_user, cls.auth_service, settings, cls.logger)
 
     @classmethod
     async def register_user(cls) -> RegisterUser:
-        return RegisterUser(cls.uow, cls.auth_service, cls.logger)
+        return RegisterUser(cls.uow, cls.auth_service, cls.hasher, cls.logger)
 
 
 class UserDependencies:
