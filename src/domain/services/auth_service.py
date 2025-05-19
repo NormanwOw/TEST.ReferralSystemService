@@ -52,13 +52,11 @@ class AuthService:
 
     def authenticate_user(self, password: str, user: User):
         if not self.hasher.verify(password, user.hashed_password):
-            raise UnauthorizedException()
+            raise InvalidPasswordException()
 
     def get_access_token(self, form_data: OAuth2PasswordRequestForm, user: User, ttl: timedelta) -> str:
         try:
-            verify_password = self.hasher.verify(form_data.password, user.hashed_password)
-            if not verify_password:
-                raise InvalidPasswordException()
+            self.authenticate_user(form_data.password, user)
             return self.token_service.create_access_token(user, expires_delta=ttl)
         except AppException as ex:
             raise ex
