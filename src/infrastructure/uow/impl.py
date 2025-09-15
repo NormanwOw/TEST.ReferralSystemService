@@ -1,4 +1,5 @@
 from src.infrastructure.repositories.codes_repo import CodesRepository
+from src.infrastructure.repositories.interfaces import IUsersRepository, ICodesRepository
 from src.infrastructure.repositories.users_repo import UsersRepository
 from src.infrastructure.uow.interfaces import IUnitOfWork
 
@@ -10,8 +11,6 @@ class UnitOfWork(IUnitOfWork):
 
     async def __aenter__(self):
         self.__session = self.__session_factory()
-        self.users: UsersRepository = UsersRepository(self.__session)
-        self.codes: CodesRepository = CodesRepository(self.__session)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -24,3 +23,11 @@ class UnitOfWork(IUnitOfWork):
 
     async def rollback(self):
         await self.__session.rollback()
+
+    @property
+    def users(self) -> IUsersRepository:
+        return UsersRepository(self.__session)
+
+    @property
+    def codes(self) -> ICodesRepository:
+        return CodesRepository(self.__session)
