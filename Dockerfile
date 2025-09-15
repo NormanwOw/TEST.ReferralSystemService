@@ -1,13 +1,12 @@
-FROM python:3.10-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm
 
 WORKDIR /app
 
-COPY /pyproject.toml /app
+COPY pyproject.toml uv.lock ./
 
-RUN pip3 install poetry
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-root
+RUN uv venv && uv sync --frozen --no-cache
 
 COPY . .
 
-LABEL project='referral_system_service' version=1.0
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/usr/local/lib/python3.10"

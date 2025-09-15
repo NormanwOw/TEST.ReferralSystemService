@@ -1,3 +1,4 @@
+from fastapi.security import OAuth2PasswordBearer
 from pydantic_settings import SettingsConfigDict, BaseSettings
 
 DEBUG = False
@@ -33,3 +34,5 @@ DATABASE_URL = (f'postgresql+asyncpg://{settings.POSTGRES_USER}:{settings.POSTGR
 REDIS_URL = f'redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}'
 
 VERSION = 1
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/token')

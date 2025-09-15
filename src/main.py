@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
+from dishka import make_async_container
+from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -8,6 +10,7 @@ from redis import asyncio as aioredis
 
 from config import VERSION, REDIS_URL
 from src.infrastructure.logger.logger import Logger
+from src.presentation.containers import UserProvider, CodeProvider, AuthProvider
 from src.presentation.routers.auth_routers import router as auth_router
 from src.presentation.routers.user_routers import router as user_router
 
@@ -29,6 +32,9 @@ app = FastAPI(
     redoc_url=None,
     lifespan=lifespan
 )
+
+container = make_async_container(UserProvider(), CodeProvider(), AuthProvider())
+setup_dishka(container, app)
 
 app.include_router(
     auth_router

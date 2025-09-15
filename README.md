@@ -1,9 +1,9 @@
 # Referral System Service
 
-![](https://img.shields.io/badge/Python-v3.10-green) ![](https://img.shields.io/badge/FastAPI-v0.115.8-blue) 
+![](https://img.shields.io/badge/Python-v3.13-green) ![](https://img.shields.io/badge/FastAPI-v0.115.8-blue) 
 ![](https://img.shields.io/badge/SQLAlchemy-v2.0-yellow) ![](https://img.shields.io/badge/PostgreSQL-v16-blue) 
 ![](https://img.shields.io/badge/Redis-v7.0-red) ![](https://img.shields.io/badge/Alembic-v2.0-violet) 
-![](https://img.shields.io/badge/Docker-blue)
+![](https://img.shields.io/badge/Docker-blue) ![](https://img.shields.io/badge/UV-FF1493)
 
 
 ## Install
