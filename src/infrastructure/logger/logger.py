@@ -1,8 +1,5 @@
 import logging
-from functools import wraps
 from logging.handlers import RotatingFileHandler
-
-from fastapi import HTTPException
 
 from src.infrastructure.logger.interfaces import ILogger
 
@@ -43,18 +40,3 @@ class Logger(ILogger):
 
 
 logger = Logger()
-
-
-def error_decorator(message):
-    def wrapper(func):
-        @wraps(func)
-        async def inner(*args, **kwargs):
-            try:
-                result = await func(*args, **kwargs)
-                return result
-            except HTTPException as ex:
-                raise ex
-            except Exception:
-                logger.error(message)
-        return inner
-    return wrapper

@@ -8,6 +8,7 @@ dependencies = [
     "alembic==1.14.1",
     "asyncpg==0.30.0",
     "bcrypt==4.0.1",
+    "dishka>=1.7.1",
     "fastapi==0.115.8",
     "fastapi-cache2[redis]==0.2.2",
     "flake8==7.1.1",
