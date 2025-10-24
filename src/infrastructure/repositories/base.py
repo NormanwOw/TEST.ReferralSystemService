@@ -16,9 +16,14 @@ class SQLAlchemyRepository(ISQLAlchemyRepository):
         self.session = session
         self.model = model
 
-    async def add(self, data: T) -> T:
+    async def add(self, data: T, cache: bool = False) -> T:
         self.session.add(data)
+
+        hash = data.__hash__()
         await self.session.flush()
+        if cache:
+            data.to_cache(hash)
+
         return data
 
     async def find_all(
