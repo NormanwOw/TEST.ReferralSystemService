@@ -12,7 +12,7 @@ T = TypeVar('T', bound=Base)
 class ISQLAlchemyRepository(ABC):
 
     @abstractmethod
-    async def add(self, data: T, cache: bool = False) -> T:
+    async def add(self, data: T, cache: bool = False, ttl: int = 0) -> T:
         raise NotImplementedError
 
     @abstractmethod

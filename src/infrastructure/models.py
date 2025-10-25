@@ -1,45 +1,20 @@
 import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional
-from hashlib import sha256
 
 import pytz
-from sqlalchemy import UUID, Column, ForeignKey, inspect
+from sqlalchemy import UUID, Column, ForeignKey
 from sqlalchemy.dialects.postgresql import TIMESTAMP
-from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from config import settings
+from src.infrastructure.sqlalchemy_cache import DeclarativeBaseWithCache
 
 
-class SQLAlchemyCache(DeclarativeBase):
+class Base(DeclarativeBaseWithCache):
     __abstract__ = True
 
-    _cache = {}
-
-    def __init__(self, **kwargs):
-        data = ';'.join(f'{k}={v}'for k, v in kwargs.items())
-        hash = sha256(f'{self.__class__.__name__} {data}'.encode()).hexdigest()
-        instance = self._cache.get(hash)
-        attrs = instance.to_dict() if instance else kwargs
-        for k, v in attrs.items():
-            setattr(self, k, v)
-
-    def __hash__(self):
-        data = ';'.join(f'{k}={v}' for k, v in self.__dict__.items() if k != '_sa_instance_state')
-        return sha256(f'{self.__class__.__name__} {data}'.encode()).hexdigest()
-
-    def to_dict(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-
-    def to_cache(self, hash: str):
-        self._cache[hash] = self
-
-    def from_cache(self):
-        return self._cache.get(self.__hash__())
-
-
-class Base(SQLAlchemyCache):
-    __abstract__ = True
+    ttl_sec = 10
 
     id: Mapped[uuid] = mapped_column(
         UUID, nullable=False, primary_key=True, unique=True, default=uuid.uuid4

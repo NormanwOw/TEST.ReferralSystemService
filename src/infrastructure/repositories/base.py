@@ -16,17 +16,17 @@ class SQLAlchemyRepository(ISQLAlchemyRepository):
         self.session = session
         self.model = model
 
-    async def add(self, data: T, cache: bool = False) -> T:
+    async def add(self, data: T, cache: bool = False, ttl: int = 0) -> T:
         cached_object = data.from_cache()
         if cached_object:
             return cached_object
 
         self.session.add(data)
 
-        hash = data.__hash__()
+        str_hash = data.__hash__()
         await self.session.flush()
         if cache:
-            data.to_cache(hash)
+            data.to_cache(str_hash, ttl_sec=ttl)
 
         return data
 

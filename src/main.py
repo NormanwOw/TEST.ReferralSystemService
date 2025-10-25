@@ -22,13 +22,14 @@ async def lifespan(_application: FastAPI) -> AsyncIterator[None]:
         user = UserModel(
             email='<EMAIL>',
             password='<PASSWORD>',
-            disabled=False,
+            disabled=False
         )
         user = await uow.users.add(user, cache=True)
         cached_user = UserModel(
             email='<EMAIL>',
             password='<PASSWORD>',
-            disabled=False
+            disabled=False,
+            referrer_id=None
         )
         assert user.id == cached_user.id
 
