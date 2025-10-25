@@ -71,5 +71,6 @@ class DeclarativeBaseWithCache(DeclarativeBase, TTLCache):
         ttl = self._ttl_mapper.get(str_hash)
         if ttl and time.time() > ttl:
             self._ttl_mapper.pop(str_hash)
+            self.__cache.pop(str_hash, None)
             return
         return self.__cache.get(str_hash)
