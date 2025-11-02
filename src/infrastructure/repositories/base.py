@@ -23,11 +23,14 @@ class SQLAlchemyRepository(ISQLAlchemyRepository):
 
         self.session.add(data)
 
-        str_hash = data.__hash__()
-        await self.session.flush()
         if cache:
-            data.to_cache(str_hash, ttl_sec=ttl)
+            if not data.model_id_storage[data.__class__.__name__]:
+                await self.session.flush()
+                data.model_id_storage[data.__class__.__name__] = data.id - 1
+            data.to_cache(ttl_sec=ttl)
+            return data.from_cache()
 
+        await self.session.flush()
         return data
 
     async def find_all(

@@ -1,4 +1,5 @@
 import time
+from collections import defaultdict
 from hashlib import sha256
 
 from sqlalchemy import inspect
@@ -38,6 +39,7 @@ class DeclarativeBaseWithCache(DeclarativeBase, TTLCache):
     __abstract__ = True
 
     __cache = {}
+    model_id_storage = defaultdict(int)
 
     def __init__(self, **kwargs):
         all_columns = [c.key for c in inspect(self.__class__).column_attrs if c.key != 'id']
@@ -58,12 +60,14 @@ class DeclarativeBaseWithCache(DeclarativeBase, TTLCache):
     def to_dict(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
-    def to_cache(self, str_hash: str, ttl_sec: int = 0):
-        self.__cache[str_hash] = self
+    def to_cache(self, ttl_sec: int = 0):
+        self.model_id_storage[self.__class__.__name__] += 1
+        self.id = self.model_id_storage[self.__class__.__name__]
+        self.__cache[self.__hash__()] = self
         ttl = ttl_sec or self.ttl_sec
         if ttl:
             self.validate_ttl(ttl_sec)
-            self._ttl_mapper[str_hash] = time.time() + ttl
+            self._ttl_mapper[self.__hash__()] = time.time() + ttl
 
     def from_cache(self, str_hash: str = None):
         if not str_hash:

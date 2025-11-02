@@ -31,7 +31,22 @@ async def lifespan(_application: FastAPI) -> AsyncIterator[None]:
             disabled=False,
             referrer_id=None
         )
-        assert user.id == cached_user.id
+        cached_user = await uow.users.add(cached_user, cache=True)
+        cached_user2 = UserModel(
+            email='<EMAIL2>',
+            password='<PASSWORD>',
+            disabled=False,
+            referrer_id=None
+        )
+        cached_user2 = await uow.users.add(cached_user2, cache=True)
+        cached_user3 = UserModel(
+            email='<EMAIL3>',
+            password='<PASSWORD>',
+            disabled=False,
+            referrer_id=None
+        )
+        cached_user3 = await uow.users.add(cached_user3, cache=True)
+        a=1
 
     logger = Logger()
     logger.info('Start app...')
