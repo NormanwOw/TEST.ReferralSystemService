@@ -3,8 +3,7 @@ from uuid import UUID
 
 from dishka import FromDishka
 from dishka.integrations.fastapi import inject
-from fastapi import APIRouter, Response
-from fastapi.params import Depends
+from fastapi import APIRouter, Depends, Response
 from fastapi_cache.decorator import cache
 from pydantic import EmailStr
 

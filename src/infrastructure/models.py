@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytz
-from sqlalchemy import UUID, Column, Enum as SAEnum, ForeignKey
+from sqlalchemy import UUID, Enum as SAEnum, ForeignKey
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
@@ -12,7 +12,7 @@ from src.domain.enums.role import RoleEnum
 
 
 class Base(DeclarativeBase):
-    id: Mapped[uuid] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUID, nullable=False, primary_key=True, unique=True, default=uuid.uuid4
     )
 
@@ -21,7 +21,7 @@ class CodeModel(Base):
     __tablename__ = 'codes'
 
     value: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
-    created_at: Mapped[datetime] = Column(TIMESTAMP, default=datetime.utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.utcnow, nullable=False)
     user_email: Mapped[str] = mapped_column(
         ForeignKey('users.email', ondelete='CASCADE'), nullable=False, unique=True
     )

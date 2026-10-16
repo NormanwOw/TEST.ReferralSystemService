@@ -6,3 +6,17 @@ repos:
         exclude: ^migrations
         additional_dependencies:
           - flake8-print
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1
+    hooks:
+      - id: ruff
+        args: [--fix]
+        exclude: ^migrations
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        exclude: ^migrations

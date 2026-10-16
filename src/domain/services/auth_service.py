@@ -20,7 +20,7 @@ class AuthService:
         token_service: ITokenService,
         hasher: IPasswordHasher,
         settings: Settings,
-        get_user: UseCase,
+        get_user: UseCase[str, User],
         logger: ILogger
     ):
         self.token_service = token_service
@@ -32,7 +32,7 @@ class AuthService:
     async def get_current_user(self, token: str) -> User:
 
         payload = self.token_service.decode_token(token)
-        email: str = payload.get('sub')
+        email = payload.get('sub')
         if email is None:
             raise UnauthorizedException()
 

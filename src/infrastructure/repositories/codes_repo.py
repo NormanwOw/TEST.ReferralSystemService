@@ -5,7 +5,7 @@ from src.infrastructure.repositories.base import SQLAlchemyRepository
 from src.infrastructure.repositories.interfaces import ICodesRepository
 
 
-class CodesRepository(SQLAlchemyRepository, ICodesRepository):
+class CodesRepository(SQLAlchemyRepository[CodeModel], ICodesRepository):
 
     def __init__(self, session: AsyncSession):
         self.__session = session

@@ -5,7 +5,7 @@ from src.infrastructure.repositories.base import SQLAlchemyRepository
 from src.infrastructure.repositories.interfaces import IRolesRepository
 
 
-class RolesRepository(SQLAlchemyRepository, IRolesRepository):
+class RolesRepository(SQLAlchemyRepository[RoleModel], IRolesRepository):
 
     def __init__(self, session: AsyncSession):
         self.__session = session

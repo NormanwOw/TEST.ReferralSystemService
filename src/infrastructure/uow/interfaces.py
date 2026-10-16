@@ -4,9 +4,21 @@ from src.infrastructure.repositories.interfaces import ICodesRepository, IRolesR
 
 
 class IUnitOfWork(ABC):
-    codes: ICodesRepository
-    roles: IRolesRepository
-    users: IUsersRepository
+
+    @property
+    @abstractmethod
+    def codes(self) -> ICodesRepository:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def roles(self) -> IRolesRepository:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def users(self) -> IUsersRepository:
+        raise NotImplementedError
 
     async def __aenter__(self):
         raise NotImplementedError

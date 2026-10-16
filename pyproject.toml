@@ -22,3 +22,30 @@ dependencies = [
     "pytz==2025.1",
     "uvicorn==0.34.0",
 ]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.4.0",
+    "ruff>=0.17.1",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+exclude = ["migrations"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "T20"]
+ignore = ["W605"]
+
+[tool.mypy]
+python_version = "3.13"
+ignore_missing_imports = true
+explicit_package_bases = true
+mypy_path = "."
+plugins = ["pydantic.mypy"]
+no_implicit_optional = false
+exclude = "^migrations/"

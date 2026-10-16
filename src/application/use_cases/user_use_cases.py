@@ -61,9 +61,10 @@ class GetReferralsByUserID(UseCase[UUID, List[UserResponse]]):
             raise ex
         except Exception:
             self.logger.error(f'Ошибка при получении рефералов по ID пользователя: {user_id}')
+            raise
 
 
-class RegisterUser(UseCase[Code, None]):
+class RegisterUser(UseCase[RegistrationForm, None]):
 
     def __init__(
         self,
@@ -77,7 +78,7 @@ class RegisterUser(UseCase[Code, None]):
         self.hasher = hasher
         self.logger = logger
 
-    async def __call__(self, form_data: RegistrationForm):
+    async def __call__(self, form_data: RegistrationForm) -> None:
         try:
             async with self.uow:
                 user = await self.uow.users.find_by_email(form_data.email)

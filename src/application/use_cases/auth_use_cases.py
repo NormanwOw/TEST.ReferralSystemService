@@ -1,4 +1,5 @@
-from asyncpg.pgproto.pgproto import timedelta
+from datetime import timedelta
+
 from fastapi.security import OAuth2PasswordRequestForm
 
 from config import Settings
@@ -14,12 +15,12 @@ class AuthUser(UseCase[OAuth2PasswordRequestForm, Token]):
 
     def __init__(
         self,
-        get_user: UseCase,
+        get_user: GetUserByEmail,
         auth_service: AuthService,
         settings: Settings,
         logger: ILogger
     ):
-        self.get_user: GetUserByEmail = get_user
+        self.get_user = get_user
         self.auth_service = auth_service
         self.settings = settings
         self.logger = logger
@@ -35,4 +36,3 @@ class AuthUser(UseCase[OAuth2PasswordRequestForm, Token]):
         except Exception as ex:
             self.logger.error(f'Ошибка при авторизации пользователя {form_data.username}')
             raise ex
-
