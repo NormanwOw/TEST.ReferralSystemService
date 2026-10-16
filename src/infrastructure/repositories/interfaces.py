@@ -62,3 +62,7 @@ class IUsersRepository(ISQLAlchemyRepository, ABC):
 
 class ICodesRepository(ISQLAlchemyRepository, ABC):
     pass
+
+
+class IRolesRepository(ISQLAlchemyRepository, ABC):
+    pass

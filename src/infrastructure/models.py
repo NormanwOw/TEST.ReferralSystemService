@@ -3,11 +3,12 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytz
-from sqlalchemy import UUID, Column, ForeignKey
+from sqlalchemy import UUID, Column, Enum as SAEnum, ForeignKey
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped, relationship
 
 from config import settings
+from src.domain.enums.role import RoleEnum
 
 
 class Base(DeclarativeBase):
@@ -45,6 +46,7 @@ class UserModel(Base):
     password: Mapped[str] = mapped_column(nullable=False)
     disabled: Mapped[bool] = mapped_column()
     referrer_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=True)
+    role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey('roles.id'), nullable=True)
 
     code: Mapped[CodeModel] = relationship(
         CodeModel,
@@ -66,4 +68,27 @@ class UserModel(Base):
         cascade='all, delete-orphan',
         uselist=True,
         lazy='joined'
+    )
+    role: Mapped['RoleModel'] = relationship(
+        'RoleModel',
+        back_populates='users',
+        uselist=False,
+        lazy='joined'
+    )
+
+
+class RoleModel(Base):
+    __tablename__ = 'roles'
+
+    name: Mapped[RoleEnum] = mapped_column(
+        SAEnum(
+            RoleEnum,
+            name='role_enum',
+            values_callable=lambda enum_cls: [member.value for member in enum_cls]
+        ), nullable=False, unique=True, index=True)
+
+    users: Mapped[List['UserModel']] = relationship(
+        'UserModel',
+        back_populates='role',
+        uselist=True
     )

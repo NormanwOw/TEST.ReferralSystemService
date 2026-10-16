@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 
-from src.infrastructure.repositories.interfaces import ICodesRepository, IUsersRepository
+from src.infrastructure.repositories.interfaces import ICodesRepository, IRolesRepository, IUsersRepository
 
 
 class IUnitOfWork(ABC):
     codes: ICodesRepository
+    roles: IRolesRepository
     users: IUsersRepository
 
     async def __aenter__(self):

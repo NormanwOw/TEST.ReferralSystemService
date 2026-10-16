@@ -1,5 +1,6 @@
 from src.infrastructure.repositories.codes_repo import CodesRepository
-from src.infrastructure.repositories.interfaces import IUsersRepository, ICodesRepository
+from src.infrastructure.repositories.interfaces import IUsersRepository, ICodesRepository, IRolesRepository
+from src.infrastructure.repositories.roles_repo import RolesRepository
 from src.infrastructure.repositories.users_repo import UsersRepository
 from src.infrastructure.uow.interfaces import IUnitOfWork
 
@@ -31,3 +32,7 @@ class UnitOfWork(IUnitOfWork):
     @property
     def codes(self) -> ICodesRepository:
         return CodesRepository(self.__session)
+
+    @property
+    def roles(self) -> IRolesRepository:
+        return RolesRepository(self.__session)
