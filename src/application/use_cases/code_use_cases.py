@@ -16,6 +16,9 @@ class CreateCode(UseCase[UserSchema, CodeSchema]):
         self.logger = logger
 
     async def __call__(self, user: UserSchema) -> CodeSchema:
+        if user.email is None:
+            raise HTTPException(status_code=400, detail='Email is required')
+
         try:
             async with self.uow:
                 db_code = CodeModel(value=Code.generate_code(), user_email=user.email)

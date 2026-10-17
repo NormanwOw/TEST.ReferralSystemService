@@ -46,6 +46,6 @@ python_version = "3.13"
 ignore_missing_imports = true
 explicit_package_bases = true
 mypy_path = "."
-plugins = ["pydantic.mypy"]
+plugins = ["pydantic.mypy", "sqlalchemy.ext.mypy.plugin"]
 no_implicit_optional = false
 exclude = "^migrations/"
